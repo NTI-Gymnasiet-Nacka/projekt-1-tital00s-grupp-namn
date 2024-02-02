@@ -2,7 +2,6 @@ import sqlite3
 
 
 class Database:
-
     def __init__(self, path="./db.db", **kwargs):
         self.path = path
         self.schemas = {}
@@ -64,11 +63,12 @@ class Database:
     """
         with self as db:
             cursor = db.cursor()
-            cursor.execute("INSERT INTO reservation (id, name, amt_guests, date, table_nr) VALUE (?, ?, ?, ?, ?)", data)
+            cursor.execute("INSERT INTO reservation (id, name, amt_guests, date, table_nr) \
+                            VALUES (?, ?, ?, ?, ?)", data)
             db.commit()
             
 
-    def remove_data(self, data):
+    def remove_data(self, id):
         """
     Removes reservation data from the database based on the provided reservation ID.
 
@@ -95,14 +95,44 @@ class Database:
     """
         with self as db:
             cursor = db.cursor()
-            cursor.execute("DELETE FROM reservation WHERE id=?", data[0])
+            cursor.execute("DELETE FROM reservation WHERE id=?", (id,))
             db.commit()
 
-    def update_data():
-        pass
+    def update_data(self, data):
+        """
+    Updates reservation data in the database based on the provided reservation ID.
 
-    def get_data():
-        pass
+    Parameters:
+    - self: The instance of the class representing the database connection.
+    - data (tuple): A tuple containing reservation data in the order (id, name, amt_guests, date, table_nr).
 
-db = Database(reservation=["first_name", "last_name"])
-    
+    Raises:
+    - Any exceptions that may occur during database interaction.
+
+    Description:
+    This method updates a reservation record in the 'reservation' table of the connected database. It uses the provided
+    data tuple to update the corresponding columns (name, amt_guests, date, table_nr) for the specified reservation ID.
+    The changes are committed to the database after the execution of the SQL UPDATE statement.
+
+    Example:
+    ```
+    db_connection = YourDatabaseConnection()
+    updated_reservation_data = (1, 'New Name', 5, '2024-02-03', 4)
+    db_connection.update_data(updated_reservation_data)
+    ```
+    """
+        with self as db:
+            cursor = db.cursor()
+            cursor.execute("UPDATE reservation SET name=?, amt_guests=?, date=?, table_nr=? WHERE id=?", 
+                           (data[1], data[2], data[3], data[4], data[0]))
+            db.commit()
+
+    def get_data(self, id="*"):
+        
+        with self as db:
+            cursor = db.cursor()
+            
+            if not id == "*": cursor.execute("SELECT * FROM reservation WHERE id=?", id)
+            else: cursor.execute("SELECT * FROM reservation")
+            
+            return cursor.fetchall()
