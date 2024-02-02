@@ -67,7 +67,6 @@ class Database:
                             VALUES (?, ?, ?, ?, ?)", data)
             db.commit()
             
-
     def remove_data(self, id):
         """
     Removes reservation data from the database based on the provided reservation ID.
@@ -128,11 +127,10 @@ class Database:
             db.commit()
 
     def get_data(self, id="*"):
-        
         with self as db:
             cursor = db.cursor()
             
-            if not id == "*": cursor.execute("SELECT * FROM reservation WHERE id=?", id)
+            if not id == "*": cursor.execute("SELECT * FROM reservation WHERE id=?", (id,))
             else: cursor.execute("SELECT * FROM reservation")
             
             return cursor.fetchall()
