@@ -106,7 +106,39 @@ class Database:
             db.commit()
 
     def get_data(self, id="*"):
-        
+        """
+    Retrieves reservation data from the database based on the provided reservation ID.
+
+    Parameters:
+    - self: The instance of the class representing the database connection.
+    - id (int or str, optional): The reservation ID to identify the record to be retrieved.
+      Defaults to "*" (wildcard), meaning all records will be retrieved.
+
+    Returns:
+    - list of tuples: A list containing tuples representing reservation data matching the provided ID.
+      Each tuple corresponds to a row in the 'reservation' table.
+
+    Raises:
+    - Any exceptions that may occur during database interaction.
+
+    Description:
+    This method retrieves reservation data from the 'reservation' table in the connected database. If a specific
+    reservation ID is provided, only the record with that ID is retrieved. If the ID is set to "*", all records are
+    retrieved. The function returns a list of tuples, where each tuple contains the values of a row in the 'reservation'
+    table.
+
+    Example:
+    ```
+    db_connection = YourDatabaseConnection()
+    
+    # Retrieve all reservation data
+    all_reservations = db_connection.get_data()
+
+    # Retrieve reservation data for a specific ID
+    reservation_id_to_retrieve = 1
+    specific_reservation = db_connection.get_data(reservation_id_to_retrieve)
+    ```
+    """
         with self as db:
             cursor = db.cursor()
             
