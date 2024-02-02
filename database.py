@@ -6,8 +6,7 @@ class Database:
         self.path = path
         self.schemas = {}
         for schema_name, schema in kwargs.items():
-            self.schemas[schema_name] = schema 
-        print(self.schemas)
+            self.schemas[schema_name] = schema
 
     def __enter__(self):
         self.conn = sqlite3.connect(self.path)
@@ -16,6 +15,29 @@ class Database:
     def __exit__(self, *args):
         self.conn.close()
         
+    def next_id(self):
+        """
+    Generate the next unique ID for a new reservation based on existing entries in the database.
+
+    This method accesses the 'reservation' table in the database, retrieves all existing reservations,
+    and calculates the next available unique ID. If there are no existing reservations, it starts the
+    IDs from 1. Otherwise, it finds the maximum ID in use and increments it by 1 to ensure uniqueness.
+
+    Returns:
+        new_id (int): The next available unique ID for a new reservation.
+    """
+        with self as db:
+            cursor = db.cursor()
+            cursor.execute("SELECT * FROM reservation")
+            reservations = cursor.fetchall()
+            
+            if len(reservations) == 0:
+                new_id = 1
+                return new_id
+            
+            new_id = max([int(data[0]) for data in reservations]) + 1
+            return new_id
+    
     def insert_data(self, data):
         """
     Inserts reservation data into the database.
@@ -45,7 +67,6 @@ class Database:
                             VALUES (?, ?, ?, ?, ?)", data)
             db.commit()
             
-
     def remove_data(self, id):
         """
     Removes reservation data from the database based on the provided reservation ID.
@@ -142,7 +163,7 @@ class Database:
         with self as db:
             cursor = db.cursor()
             
-            if not id == "*": cursor.execute("SELECT * FROM reservation WHERE id=?", id)
+            if not id == "*": cursor.execute("SELECT * FROM reservation WHERE id=?", (id,))
             else: cursor.execute("SELECT * FROM reservation")
             
             return cursor.fetchall()

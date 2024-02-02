@@ -19,7 +19,6 @@ class Reservation():
         # Metod för att boka bord
         pass
     
-
     def to_db_format(self):
         # Metod för att spara bokningar i databasen
         conn = sqlite3.connect('database.db')  # Replace 'database.db' with your actual database file path
