@@ -1,4 +1,4 @@
-from database import next_table_id
+from database import next_table_nr
 from database import new_table
 
 
@@ -11,7 +11,7 @@ class Table:
         return table
 
     def __init__(self, capacity: int) -> None:
-        self.id = next_table_id()
+        self.id = next_table_nr()
         self.capacity = capacity
         self.occupied = False
 
