@@ -15,7 +15,7 @@ class Database:
     def __exit__(self, *args):
         self.conn.close()
         
-    def next_id(self):
+    def next_reservation_id(self):
         """
     Generate the next unique ID for a new reservation based on existing entries in the database.
 
@@ -98,11 +98,11 @@ class Database:
     db_connection.remove_reservation(reservation_id_to_remove)
     ```
     """
-        old_length = len(self.get_data())
+        old_length = len(self.get_reservation())
         with self as db:
             cursor = db.cursor()
             cursor.execute("DELETE FROM reservation WHERE id=?", (id,))
-            if old_length == len(self.get_data()):
+            if old_length == len(self.get_reservation()):
                 print("Error: Id not found.")
             db.commit()
 
@@ -137,7 +137,7 @@ class Database:
     """
         with self as db:
             cursor = db.cursor()
-            if self.get_data(data[0]) == []:
+            if self.get_reservation(data[0]) == []:
                 print("Error: Id not found.")
             else:
                 try:
@@ -187,5 +187,67 @@ class Database:
             
             if not id == "*": cursor.execute("SELECT * FROM reservation WHERE id=?", (id,))
             else: cursor.execute("SELECT * FROM reservation")
+            
+            return cursor.fetchall()
+
+    def next_table_nr(self):
+        with self as db:
+            cursor = db.cursor()
+            cursor.execute("SELECT * FROM tables")
+            tables = cursor.fetchall()
+            
+            if len(tables) == 0:
+                new_id = 1
+                return new_id
+            
+            new_id = max([int(data[0]) for data in tables]) + 1
+            return new_id
+    
+    def new_table(self, data):
+        with self as db:
+            cursor = db.cursor()
+            try:
+                cursor.execute("INSERT INTO tables (table_nr, capacity, occupied) VALUES (?, ?, ?)", data)
+            except sqlite3.ProgrammingError as p:
+                print(p)
+                return None
+            db.commit()
+    
+    def remove_table(self, table_nr):
+        old_length = len(self.get_tables())
+        with self as db:
+            cursor = db.cursor()
+            
+            cursor.execute("DELETE FROM tables WHERE table_nr=?", (table_nr,))
+            if old_length == len(self.get_tables()):
+                print("Error: Id not found.")
+                
+            db.commit()
+    
+    def set_occupied(self, table_nr, bool):
+        with self as db:
+            cursor = db.cursor()
+            if self.get_tables(table_nr) == []:
+                print("Error: table not found.")
+            else:
+                try:
+                    cursor.execute("UPDATE tables SET occupied=? WHERE table_nr=?", (bool, table_nr))
+                except IndexError as i:
+                    print(i)
+                    return None
+            db.commit()
+    
+    def get_tables_by_capacity(self, capacity):
+        with self as db:
+            cursor = db.cursor()
+            
+            cursor.execute("SELECT * ")
+    
+    def get_tables(self, table_nr="*"):
+        with self as db:
+            cursor = db.cursor()
+            
+            if not table_nr == "*": cursor.execute("SELECT * FROM tables WHERE table_nr=?", (table_nr,))
+            else: cursor.execute("SELECT * FROM tables")
             
             return cursor.fetchall()
