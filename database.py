@@ -98,11 +98,11 @@ class Database:
     db_connection.remove_reservation(reservation_id_to_remove)
     ```
     """
-        old_length = len(self.get_data())
+        old_length = len(self.get_reservation())
         with self as db:
             cursor = db.cursor()
             cursor.execute("DELETE FROM reservation WHERE id=?", (id,))
-            if old_length == len(self.get_data()):
+            if old_length == len(self.get_reservation()):
                 print("Error: Id not found.")
             db.commit()
 
@@ -137,7 +137,7 @@ class Database:
     """
         with self as db:
             cursor = db.cursor()
-            if self.get_data(data[0]) == []:
+            if self.get_reservation(data[0]) == []:
                 print("Error: Id not found.")
             else:
                 try:
