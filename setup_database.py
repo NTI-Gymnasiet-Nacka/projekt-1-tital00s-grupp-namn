@@ -11,6 +11,13 @@ cur.execute(''' CREATE TABLE IF NOT EXISTS reservation
             date TEXT,
             table_nr INTEGER)
 ''')
+
+cur.execute(''' CREATE TABLE IF NOT EXISTS tables 
+            (table_nr INTEGER,
+            capacity INTEGER,
+            occupied BOOL)
+''')
+
 cur.close()
 conn.close()
 
