@@ -16,23 +16,11 @@ class Reservation():
         return "This is not possible.\n Cant make reservation for more than 8 people.\nThis is a restaurant not a circus." 
     
     def new_reservation(self):
-        # Metod för att boka bord
-        pass
+        # Metod för att göra reservationer
+        pass 
     
+
     def to_db_format(self):
         # Metod för att spara bokningar i databasen
-        conn = sqlite3.connect('database.db')  # Replace 'database.db' with your actual database file path
-        c = conn.cursor()
-
-        # Create a table if it doesn't exist
-        c.execute('''CREATE TABLE IF NOT EXISTS reservations
-                    (amount INTEGER, name TEXT, date TEXT, table_id INTEGER)''')
-
-        # Insert the reservation into the table
-        c.execute("INSERT INTO reservations VALUES (?, ?, ?, ?)",
-                (self.user_amount, self.user_id, self.user_date, self.table_id))
-
-        conn.commit()
-        conn.close()
-
-    
+        def to_db_format(self):
+            return (self.user_id, self.user_name, self.user_amount, self.user_date, self.table_id)
