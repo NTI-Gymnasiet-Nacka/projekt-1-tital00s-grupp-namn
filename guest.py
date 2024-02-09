@@ -42,6 +42,19 @@ def main():
     for i, date in enumerate(weekdays_dict.keys()):
         print(f"{i+1}. {date}")
 
+    while True:
+        date = input("Please input the date of your reservation:")
+        try:
+            date = int(date)
+            if date < 1 or date > 7:
+                print("Please input a valid selection.")
+                continue
+            else:
+                date = list(weekdays_dict.values())[date-1]
+                break
+        except:
+            print("Please input a valid number.")
+
 
 if __name__ == "__main__":
     main()
