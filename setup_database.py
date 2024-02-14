@@ -11,15 +11,15 @@ cur.execute(''' CREATE TABLE IF NOT EXISTS reservation
             date TEXT,
             table_nr INTEGER)
 ''')
-
+cur.execute("DROP TABLE tables")
 cur.execute(''' CREATE TABLE IF NOT EXISTS tables 
             (table_nr INTEGER,
             capacity INTEGER,
-            occupied BOOL)
+            occupied TEXT)
 ''')
 
 cur.close()
 conn.close()
 
-# Det här är ett schema för vår databas där all information 
+# Det här är ett schema för vår databas där all information
 # sparas i ordningen ovan där id i int osv. frågor mejla niklas
