@@ -1,4 +1,5 @@
 import sqlite3
+from table import Table
 
 
 class Database:
@@ -11,10 +12,10 @@ class Database:
     def __enter__(self):
         self.conn = sqlite3.connect(self.path)
         return self.conn
-    
+
     def __exit__(self, *args):
         self.conn.close()
-        
+
     def next_reservation_id(self):
         """
     Generate the next unique ID for a new reservation based on existing entries in the database.
@@ -30,14 +31,14 @@ class Database:
             cursor = db.cursor()
             cursor.execute("SELECT * FROM reservation")
             reservations = cursor.fetchall()
-            
+
             if len(reservations) == 0:
                 new_id = 1
                 return new_id
-            
+
             new_id = max([int(data[0]) for data in reservations]) + 1
             return new_id
-    
+
     def insert_reservation(self, data):
         """
     Inserts reservation data into the 'reservation' table of the connected database.
@@ -77,7 +78,7 @@ class Database:
             else:
                 print("None digit value was entered.")
             db.commit()
-            
+
     def remove_reservation(self, id):
         """
     Removes a reservation record from the 'reservation' table based on the provided reservation ID.
@@ -144,8 +145,8 @@ class Database:
                 print("Error: Id not found.")
             else:
                 try:
-                    cursor.execute("UPDATE reservation SET name=?, amt_guests=?, date=?, table_nr=? WHERE id=?", 
-                                (data[1], data[2], data[3], data[4], data[0]))
+                    cursor.execute("UPDATE reservation SET name=?, amt_guests=?, date=?, table_nr=? WHERE id=?",
+                                   (data[1], data[2], data[3], data[4], data[0]))
                 except IndexError as i:
                     print(i)
                     return None
@@ -176,7 +177,7 @@ class Database:
     Example:
     ```
     db_connection = YourDatabaseConnection()
-    
+
     # Retrieve all reservation data
     all_reservations = db_connection.get_reservation()
 
@@ -187,10 +188,12 @@ class Database:
     """
         with self as db:
             cursor = db.cursor()
-            
-            if not id == "*": cursor.execute("SELECT * FROM reservation WHERE id=?", (id,))
-            else: cursor.execute("SELECT * FROM reservation")
-            
+
+            if not id == "*":
+                cursor.execute("SELECT * FROM reservation WHERE id=?", (id,))
+            else:
+                cursor.execute("SELECT * FROM reservation")
+
             return cursor.fetchall()
 
     def next_table_nr(self):
@@ -221,15 +224,15 @@ class Database:
             cursor = db.cursor()
             cursor.execute("SELECT * FROM tables")
             tables = cursor.fetchall()
-            
+
             if len(tables) == 0:
                 new_id = 1
                 return new_id
-            
+
             new_id = max([int(data[0]) for data in tables]) + 1
             return new_id
-    
-    def new_table(self, data):
+
+    def new_table(self, data: Table):
         """
     Adds a new table to the 'tables' table of the connected database.
 
@@ -261,16 +264,17 @@ class Database:
     """
         with self as db:
             cursor = db.cursor()
-            if data[0] > 0 and data[1] > 0:
+            if data.capacity > 0:
                 try:
-                    cursor.execute("INSERT INTO tables (table_nr, capacity, occupied) VALUES (?, ?, ?)", data)
+                    cursor.execute(
+                        "INSERT INTO tables (table_nr, capacity, occupied) VALUES (?, ?, ?)", (data.id, data.capacity, data.occupied))
                 except sqlite3.ProgrammingError as p:
                     print(p)
                     return None
             else:
                 print("Non digit value was entered.")
             db.commit()
-    
+
     def remove_table(self, table_nr):
         """
     Removes a table record from the 'tables' table of the connected database based on the provided table number.
@@ -303,15 +307,16 @@ class Database:
         with self as db:
             cursor = db.cursor()
             try:
-                cursor.execute("DELETE FROM tables WHERE table_nr=?", (table_nr,))
+                cursor.execute(
+                    "DELETE FROM tables WHERE table_nr=?", (table_nr,))
             except sqlite3.InterfaceError as i:
                 print(i)
                 return None
             if old_length == len(self.get_tables()):
                 print("Error: Id not found.")
-                
+
             db.commit()
-    
+
     def set_occupied(self, table_nr, bool):
         """
     Updates the 'occupied' status of a table in the 'tables' table of the connected database.
@@ -340,7 +345,7 @@ class Database:
     Example:
     ```
     db_connection = YourDatabaseConnection()
-    
+
     # Set the 'occupied' status of table number 3 to True
     db_connection.set_occupied(3, True)
 
@@ -356,12 +361,13 @@ class Database:
                 print("Entered occupied value is invalid.")
             else:
                 try:
-                    cursor.execute("UPDATE tables SET occupied=? WHERE table_nr=?", (bool, table_nr))
+                    cursor.execute(
+                        "UPDATE tables SET occupied=? WHERE table_nr=?", (bool, table_nr))
                 except IndexError as i:
                     print(i)
                     return None
             db.commit()
-    
+
     def get_tables_by_capacity(self, capacity):
         """
     Retrieves unoccupied tables from the 'tables' table of the connected database based on the provided capacity.
@@ -385,7 +391,7 @@ class Database:
     Example:
     ```
     db_connection = YourDatabaseConnection()
-    
+
     # Retrieve unoccupied tables with a specific capacity
     tables_with_capacity_4 = db_connection.get_tables_by_capacity(4)
 
@@ -395,11 +401,12 @@ class Database:
     """
         with self as db:
             cursor = db.cursor()
-            
-            cursor.execute("SELECT * FROM tables WHERE capacity=? AND occupied=False", (capacity,))
-            
+
+            cursor.execute(
+                "SELECT * FROM tables WHERE capacity=? AND occupied=False", (capacity,))
+
             return cursor.fetchall()
-    
+
     def get_tables(self, table_nr="*"):
         """
     Retrieves table information from the 'tables' table of the connected database based on the provided table number.
@@ -425,7 +432,7 @@ class Database:
     Example:
     ```
     db_connection = YourDatabaseConnection()
-    
+
     # Retrieve all table information
     all_tables = db_connection.get_tables()
 
@@ -436,9 +443,11 @@ class Database:
     """
         with self as db:
             cursor = db.cursor()
-            
-            if not table_nr == "*": cursor.execute("SELECT * FROM tables WHERE table_nr=?", (table_nr,))
-            else: cursor.execute("SELECT * FROM tables")
-            
+
+            if not table_nr == "*":
+                cursor.execute(
+                    "SELECT * FROM tables WHERE table_nr=?", (table_nr,))
+            else:
+                cursor.execute("SELECT * FROM tables")
+
             return cursor.fetchall()
-    
