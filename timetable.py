@@ -1,5 +1,4 @@
 from json import dumps as json_dumps
-from json import loads as json_loads
 
 
 def gen_timetable() -> str:
@@ -12,9 +11,4 @@ def gen_timetable() -> str:
     for value in weekdays:
         weekdays[value] = time_slots
 
-    return json_dumps(weekdays, indent=2)
-
-
-timetable = gen_timetable()
-print(timetable)
-print(type(json_loads(timetable)["Monday"]["17"]))
+    return json_dumps(weekdays)

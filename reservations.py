@@ -1,7 +1,7 @@
 import sqlite3
 
 
-class Reservation():
+class Reservation:
     """Denhär klassen är för att boka bord och spara bokningar i databasen och för att göra förändringar i bokningar"""
 
     def __init__(self, user_amount, user_name, user_date, table_id):
