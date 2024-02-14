@@ -1,4 +1,8 @@
 from os import system, name
+from database import Database
+
+
+database = Database()
 
 
 def clear():
@@ -43,8 +47,9 @@ Staff terminal
             case "5": edit_table_occupancy()
             case "6": break
             case other:
-                print("\nYou must only select either 1, 2, 3 or 4")
+                print("\nYou must only select either 1, 2, 3, 4, 5 or 6")
                 input("Press enter to try again.")
 
 if __name__=="__main__":
     menu()
+    
