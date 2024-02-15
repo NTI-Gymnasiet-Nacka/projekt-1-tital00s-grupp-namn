@@ -1,5 +1,7 @@
 import sqlite3
 from table import Table
+from json import loads as json_loads
+from json import dumps as json_dumps
 
 
 class Database:
@@ -189,10 +191,8 @@ class Database:
         with self as db:
             cursor = db.cursor()
 
-            if not id == "*":
-                cursor.execute("SELECT * FROM reservation WHERE id=?", (id,))
-            else:
-                cursor.execute("SELECT * FROM reservation")
+            if not id == "*": cursor.execute("SELECT * FROM reservation WHERE id=?", (id,))
+            else: cursor.execute("SELECT * FROM reservation")
 
             return cursor.fetchall()
 
@@ -267,7 +267,8 @@ class Database:
             if data.capacity > 0:
                 try:
                     cursor.execute(
-                        "INSERT INTO tables (table_nr, capacity, occupied) VALUES (?, ?, ?)", (data.id, data.capacity, data.occupied))
+                        "INSERT INTO tables (table_nr, capacity, occupied) VALUES (?, ?, ?)",
+                        (data.id, data.capacity, data.occupied))
                 except sqlite3.ProgrammingError as p:
                     print(p)
                     return None
@@ -304,20 +305,23 @@ class Database:
     ```
     """
         old_length = len(self.get_tables())
+        print(old_length)
+        print(self.get_tables())
         with self as db:
             cursor = db.cursor()
             try:
-                cursor.execute(
-                    "DELETE FROM tables WHERE table_nr=?", (table_nr,))
+                cursor.execute("DELETE FROM tables WHERE table_nr=?", (table_nr,))
             except sqlite3.InterfaceError as i:
                 print(i)
                 return None
             if old_length == len(self.get_tables()):
+                print(len(self.get_tables()))
+                print(self.get_tables())
                 print("Error: Id not found.")
 
             db.commit()
 
-    def set_occupied(self, table_nr, bool):
+    def set_occupied(self, table_nr, date:tuple, bool):
         """
     Updates the 'occupied' status of a table in the 'tables' table of the connected database.
 
@@ -355,14 +359,17 @@ class Database:
     """
         with self as db:
             cursor = db.cursor()
+            occupied = json_loads(self.get_tables(1)[0][2])
             if self.get_tables(table_nr) == []:
                 print("Error: table not found.")
             elif bool not in [1, 0, True, False]:
                 print("Entered occupied value is invalid.")
+            elif occupied[date[0]][date[1]] == bool:
+                print("The entered date is already set to the given bool value.")
             else:
                 try:
-                    cursor.execute(
-                        "UPDATE tables SET occupied=? WHERE table_nr=?", (bool, table_nr))
+                    occupied[date[0]][date[1]] = bool
+                    cursor.execute("UPDATE tables SET occupied=? WHERE table_nr=?", (json_dumps(occupied), table_nr))
                 except IndexError as i:
                     print(i)
                     return None
@@ -402,8 +409,7 @@ class Database:
         with self as db:
             cursor = db.cursor()
 
-            cursor.execute(
-                "SELECT * FROM tables WHERE capacity=? AND occupied=False", (capacity,))
+            cursor.execute("SELECT * FROM tables WHERE capacity=?", (capacity,))
 
             return cursor.fetchall()
 
@@ -445,8 +451,7 @@ class Database:
             cursor = db.cursor()
 
             if not table_nr == "*":
-                cursor.execute(
-                    "SELECT * FROM tables WHERE table_nr=?", (table_nr,))
+                cursor.execute("SELECT * FROM tables WHERE table_nr=?", (table_nr,))
             else:
                 cursor.execute("SELECT * FROM tables")
 
