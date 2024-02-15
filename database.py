@@ -1,5 +1,7 @@
 import sqlite3
 from table import Table
+from reservations import Reservation
+from json import dumps as json_dumps
 
 
 class Database:
@@ -39,7 +41,7 @@ class Database:
             new_id = max([int(data[0]) for data in reservations]) + 1
             return new_id
 
-    def insert_reservation(self, data):
+    def insert_reservation(self, reservation: Reservation):
         """
     Inserts reservation data into the 'reservation' table of the connected database.
 
@@ -68,16 +70,18 @@ class Database:
     """
         with self as db:
             cursor = db.cursor()
-            if data[0] > 0 and data[2] > 0 and data[4] > 0:
+            if reservation.id > 0 and reservation.user_amount > 0 and reservation.table_id > 0:
                 try:
                     cursor.execute("INSERT INTO reservation (id, name, amt_guests, date, table_nr) \
-                                    VALUES (?, ?, ?, ?, ?)", data)
+                                    VALUES (?, ?, ?, ?, ?)", reservation.to_db_format())
                 except sqlite3.ProgrammingError as p:
                     print(p)
                     return None
             else:
                 print("None digit value was entered.")
+
             db.commit()
+            self.set_occupied(reservation)
 
     def remove_reservation(self, id):
         """
@@ -150,6 +154,21 @@ class Database:
                 except IndexError as i:
                     print(i)
                     return None
+            db.commit()
+
+    def update_table(self, table: Table):
+        with self as db:
+            cursor = db.cursor()
+            if self.get_tables(table.id) == []:
+                print("Error: Table not found.")
+                return
+
+            try:
+                cursor.execute("UPDATE tables SET capacity=?, occupied=? WHERE table_nr=?",
+                               (table.capacity, json_dumps(table.occupied), table.id))
+            except IndexError as i:
+                print(i)
+                return None
             db.commit()
 
     def get_reservation(self, id="*"):
@@ -317,7 +336,7 @@ class Database:
 
             db.commit()
 
-    def set_occupied(self, table_nr, bool):
+    def set_occupied(self, reservation: Reservation):
         """
     Updates the 'occupied' status of a table in the 'tables' table of the connected database.
 
@@ -355,17 +374,22 @@ class Database:
     """
         with self as db:
             cursor = db.cursor()
-            if self.get_tables(table_nr) == []:
+            table = self.get_tables(reservation.table_id)
+
+            # Check if table exists
+            if len(table) == 0:
                 print("Error: table not found.")
-            elif bool not in [1, 0, True, False]:
-                print("Entered occupied value is invalid.")
+                return
+
+            day, time = reservation.user_date.split("_")
+            table = Table.from_db(self, table[0])
+
+            if table.occupied[day][time] == False:
+                table.occupied[day][time] = True
             else:
-                try:
-                    cursor.execute(
-                        "UPDATE tables SET occupied=? WHERE table_nr=?", (bool, table_nr))
-                except IndexError as i:
-                    print(i)
-                    return None
+                table.occupied[day][time] = False
+
+            self.update_table(table)
             db.commit()
 
     def get_tables_by_capacity(self, capacity):
@@ -403,7 +427,7 @@ class Database:
             cursor = db.cursor()
 
             cursor.execute(
-                "SELECT * FROM tables WHERE capacity=? AND occupied=False", (capacity,))
+                "SELECT * FROM tables WHERE capacity=?", (capacity,))
 
             return cursor.fetchall()
 
