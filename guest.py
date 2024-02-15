@@ -37,7 +37,7 @@ def select_date(weekdays_dict) -> str:
     return date
 
 
-def select_time(times) -> str:
+def select_time(times: dict) -> str:
     for i, time in enumerate(times.keys()):
         if times[time] == False:
             print(f"{i+1}. {time}.00")
@@ -45,18 +45,19 @@ def select_time(times) -> str:
             print(f"{i+1}. {time}.00 (Occupied)")
 
     time = input("Please select the time of your reservation:")
-    # TODO
-    if TODO == True:
-        print("Please select a non-occupied time.")
-        select_time(times)
 
     try:
         time = int(time) - 1
+        if list(times.values())[time] == True:
+            print("Please select a non-occupied time.")
+            select_time(times)
+
         if time < 0 or time > len(times) - 1:
             print("Please input a valid selection.")
             select_date(times)
-        else:
-            time = list(times.keys())[time]
+
+        time = list(times.keys())[time]
+
     except:
         print("Please input a valid number.")
         select_date(times)
@@ -89,21 +90,23 @@ def gen_dates() -> dict:
 def main():
     name = input("Please input your name:")
     amount = get_party_amount()
+
     print()
     date = select_date(gen_dates())
 
-    db = database.Database("./test.db")
+    db = database.Database()
     available_tables = db.get_tables_by_capacity(amount)
     available_times = json_loads(available_tables[0][2])[date]
 
+    print()
     time = select_time(available_times)
-    reservation = Reservation(
-        amount, name, f"{date}_{time}", available_tables[0])
+
+    reservation = Reservation(db,
+                              amount, name, f"{date}_{time}", available_tables[0][0])
+    reservation.push_to_db()
+
     print(
         f"Thank you {name}, your reservation for {amount} people on {date}, {time}:00 has been made.")
-
-    print()
-    # print()
 
 
 if __name__ == "__main__":
