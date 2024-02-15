@@ -403,7 +403,7 @@ class Database:
             cursor = db.cursor()
 
             cursor.execute(
-                "SELECT * FROM tables WHERE capacity=? AND occupied=False", (capacity,))
+                "SELECT * FROM tables WHERE capacity=?", (capacity,))
 
             return cursor.fetchall()
 
