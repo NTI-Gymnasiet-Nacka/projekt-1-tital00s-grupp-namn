@@ -321,7 +321,7 @@ class Database:
 
             db.commit()
 
-    def set_occupied(self, table_nr, date:tuple, bool):
+    def set_occupied(self, table_nr, date, bool):
         """
     Updates the 'occupied' status of a table in the 'tables' table of the connected database.
 
@@ -359,12 +359,13 @@ class Database:
     """
         with self as db:
             cursor = db.cursor()
+            day, time = date.split("_")
             occupied = json_loads(self.get_tables(1)[0][2])
             if self.get_tables(table_nr) == []:
                 print("Error: table not found.")
             elif bool not in [1, 0, True, False]:
                 print("Entered occupied value is invalid.")
-            elif occupied[date[0]][date[1]] == bool:
+            elif occupied[day][time] == bool:
                 print("The entered date is already set to the given bool value.")
             else:
                 try:
