@@ -20,10 +20,6 @@ class Reservation:
         # Ifall användaren försöker boka för mer än 8 personer
         return "This is not possible.\n Cant make reservation for more than 8 people.\nThis is a restaurant not a circus."
 
-    def new_reservation(self):
-        # Metod för att göra reservationer
-        pass
-
     def push_to_db(self):
         self.db.insert_reservation(self)
 
