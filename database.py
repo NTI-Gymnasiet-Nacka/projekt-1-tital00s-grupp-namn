@@ -156,21 +156,6 @@ class Database:
                     return None
             db.commit()
 
-    def update_table(self, table: Table):
-        with self as db:
-            cursor = db.cursor()
-            if self.get_tables(table.id) == []:
-                print("Error: Table not found.")
-                return
-
-            try:
-                cursor.execute("UPDATE tables SET capacity=?, occupied=? WHERE table_nr=?",
-                               (table.capacity, json_dumps(table.occupied), table.id))
-            except IndexError as i:
-                print(i)
-                return None
-            db.commit()
-
     def get_reservation(self, id="*"):
         """
     Retrieves reservation data from the 'reservation' table of the connected database based on the provided reservation ID.
@@ -250,6 +235,20 @@ class Database:
 
             new_id = max([int(data[0]) for data in tables]) + 1
             return new_id
+
+    def update_table(self, table: Table):
+        with self as db:
+            cursor = db.cursor()
+            if self.get_tables(table.id) == []:
+                print("Error: Table not found.")
+                return
+            try:
+                cursor.execute("UPDATE tables SET capacity=?, occupied=? WHERE table_nr=?",
+                               (table.capacity, json_dumps(table.occupied), table.id))
+            except IndexError as i:
+                print(i)
+                return None
+            db.commit()
 
     def new_table(self, data: Table):
         """
