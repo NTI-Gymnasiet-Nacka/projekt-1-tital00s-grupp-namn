@@ -13,22 +13,17 @@ def clear():
         system("clear")
 
 def remove_reservation():
-    pass
-
-def update_reservation():
-    pass
-
-def display_reservations():
     clear()
-    print("Reservations\nSelect id\n")
+    print("\nRemove reservation\nSelect id\n")
     for i in database.get_reservation():
-        print(f"{i[0]}. {i[1]}")
+            print(f"{i[0]}. {i[1]}")
     choice = input("\n")
-    if choice != "":
-        for i in database.get_reservation():
-            if choice == i[0]:
-                clear()
-                print(f"""
+    try:
+        if choice != "":
+            for i in database.get_reservation():
+                if int(choice) == i[0]:
+                    clear()
+                    print(f"""
 Reservation info
 
 Id: {i[0]}
@@ -36,9 +31,81 @@ Name: {i[1]}
 Amount of guessts: {i[2]}
 Date: {i[3]}
 Table number: {i[4]}
-                    """)
-                input()
+                        """)
+                    confirmation = input("Are you sure you want to remove this reservation, y or n?\n")
+                    if confirmation == "y" or confirmation == "Y":
+                        pass
+                    elif confirmation == "n" or confirmation == "N":
+                        break
+                    else:
+                        print("Non accepted value entered, interpreted as n.")
+                        input()
+                        
+    except ValueError:
+        print("\nEntered id was of invalid value.")
+        input("Press enter to try again.")
+
+def update_reservation():
+    clear()
+    print("\nUpdate reservation\nSelect id\n")
+    for i in database.get_reservation():
+            print(f"{i[0]}. {i[1]}")
+    choice = input("\n")
+    try:
+        if choice != "":
+            for i in database.get_reservation():
+                if int(choice) == i[0]:
+                    clear()
+                    print(f"""
+Reservation info
+
+Id: {i[0]}
+Name: {i[1]}
+Amount of guessts: {i[2]}
+Date: {i[3]}
+Table number: {i[4]}
+                        """)
+                    confirmation = input("Are you sure you want to remove this reservation, y or n?\n")
+                    if confirmation == "y" or confirmation == "Y":
+                        pass
+                    elif confirmation == "n" or confirmation == "N":
+                        break
+                    else:
+                        print("Non accepted value entered, interpreted as n.")
+                        input()
+                        
+    except ValueError:
+        print("\nEntered id was of invalid value.")
+        input("Press enter to try again.")
+
+def display_reservations():
+    while True:
+        clear()
+        print("\nReservations\nSelect id\n")
+        for i in database.get_reservation():
+            print(f"{i[0]}. {i[1]}")
+        choice = input("\n")
+        try:
+            if choice != "":
+                for i in database.get_reservation():
+                    if int(choice) == i[0]:
+                        clear()
+                        print(f"""
+Reservation info
+
+Id: {i[0]}
+Name: {i[1]}
+Amount of guessts: {i[2]}
+Date: {i[3]}
+Table number: {i[4]}
+                            """)
+                        input()
+                        break
+            else:
                 break
+        except ValueError:
+            print("\nEntered id was of invalid value.")
+            input("Press enter to try again.")
 
 def display_avalible_tables():
     pass
