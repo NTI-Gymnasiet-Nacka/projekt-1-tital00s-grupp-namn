@@ -48,6 +48,7 @@ Table number: {i[4]}
         input("Press enter to try again.")
 
 def select_date(weekdays_dict) -> str:
+    clear()
     for i, date in enumerate(weekdays_dict.keys()):
         print(f"{i+1}. {date}")
 
@@ -118,13 +119,15 @@ def select_new_reservation_date(amount, table_number):
     
     available_tables = database.get_tables_by_capacity(amount)
     for i in available_tables:
-        if available_tables[i][0] == table_number:
-            # table = available_tables[i]
-            available_times = json_loads(available_tables[i][2])[date]
+        if i[0] == table_number:
+            available_times = json_loads(i[2])[date]
     
     time = select_time(available_times)
     
     return f"{date}_{time}"
+
+def select_new_reservation_table(amount):
+    avalible_tables = database.get_tables_by_capacity(amount)
     
 
 def update_reservation():
@@ -142,21 +145,29 @@ def update_reservation():
 Reservation info
 
 Id: {i[0]}
-Name: {i[1]}
-Amount of guessts: {i[2]}
-Date: {i[3]}
-Table number: {i[4]}
+1. Name: {i[1]}
+2. Amount of guessts: {i[2]}
+3. Date: {f"{i[3].split('_')[0]}, {i[3].split('_')[1]}:00"}
+4. Table number: {i[4]}
                         """)
-                    info_choice = input("Enter the info you wish to update or enter 'all' to update all info.\nId cannot be updated.\n").lower()
+                    info_choice = input("Enter the info you wish to update or enter 'all' to update all info.\nId's cannot be updated.\n").lower()
                     match info_choice:
-                        case "name":
+                        case "1":
+                            new_name = input("Enter the new name: ").capitalize()
+                            database.update_reservation((i[0], new_name, i[2], i[3], i[4]))
+                        case "2":
                             pass
-                        case "amount of guests":
-                            pass
-                        case "date":
+                        case "3":
                             new_date = select_new_reservation_date(i[2], i[4])
-                        case "table number":
-                            pass
+                            database.update_reservation((i[0], i[1], i[2], new_date, i[4]))
+                            updated_reservation = Reservation(db="./db copy.db", user_amount=i[2], user_name=i[1], user_date=new_date, table_id=i[4])
+                            updated_reservation.id = i[0]
+                            database.set_occupied(updated_reservation)
+                            old_reservation = Reservation(db="./db copy.db", user_amount=i[2], user_name=i[1], user_date=i[3], table_id=i[4])
+                            old_reservation.id = i[0]
+                            database.set_occupied(old_reservation)
+                        case "4":
+                            select_new_reservation_table(i[2])
                         case "all":
                             new_name = input("New name: ")
                             new_amount_of_guests = input("New amount of guests: ")
@@ -186,7 +197,7 @@ Reservation info
 Id: {i[0]}
 Name: {i[1]}
 Amount of guessts: {i[2]}
-Date: {i[3]}
+Date: {f"{i[3].split('_')[0]}, {i[3].split('_')[1]}:00"}
 Table number: {i[4]}
                             """)
                         input()
