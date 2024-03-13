@@ -146,6 +146,7 @@ def select_new_reservation_table(amount, date):
             select_new_reservation_table(amount, date)
         
     except:
+        # Hoppar hit av någon anledning
         print("Please input a valid number.")
         select_new_reservation_table(amount, date)
     
