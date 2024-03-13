@@ -160,10 +160,10 @@ Id: {i[0]}
                         case "3":
                             new_date = select_new_reservation_date(i[2], i[4])
                             database.update_reservation((i[0], i[1], i[2], new_date, i[4]))
-                            updated_reservation = Reservation(db="./db copy.db", user_amount=i[2], user_name=i[1], user_date=new_date, table_id=i[4])
+                            updated_reservation = Reservation(db=database, user_amount=i[2], user_name=i[1], user_date=new_date, table_id=i[4])
                             updated_reservation.id = i[0]
                             database.set_occupied(updated_reservation)
-                            old_reservation = Reservation(db="./db copy.db", user_amount=i[2], user_name=i[1], user_date=i[3], table_id=i[4])
+                            old_reservation = Reservation(db=database, user_amount=i[2], user_name=i[1], user_date=i[3], table_id=i[4])
                             old_reservation.id = i[0]
                             database.set_occupied(old_reservation)
                         case "4":
