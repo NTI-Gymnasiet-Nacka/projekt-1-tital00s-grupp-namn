@@ -351,6 +351,33 @@ def select_new_reservation_table(amount, date, old_table_id):
 
 
 def update_reservation():
+    """
+    Function to update a reservation in the database.
+
+    This function guides the user through the process of updating a reservation. It displays a list of reservations 
+    with their IDs and prompts the user to select a reservation by entering its ID. Once a reservation is selected, 
+    the function presents the details of the chosen reservation and asks the user to choose the information to update.
+    The user can update the name, amount of guests, date, or table number of the reservation. The function then updates
+    the reservation in the database according to the user's input.
+
+    Parameters:
+    - None
+
+    Returns:
+    - None
+
+    Raises:
+    - None
+
+    Description:
+    This function provides an interactive interface for updating reservation information. It handles user input 
+    gracefully and ensures that the entered reservation ID is valid.
+
+    Example:
+    ```
+    update_reservation()
+    ```
+    """
     clear()
     print("\nUpdate reservation\nSelect id\n")
     for i in database.get_reservation():
