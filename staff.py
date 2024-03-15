@@ -6,7 +6,7 @@ from json import loads as json_loads
 from table import Table
 
 
-database = Database("./db copy.db")
+database = Database("./db.db")
 
 
 def clear():
@@ -145,7 +145,7 @@ def select_new_reservation_table(amount, date, old_table_id):
             print(f"{i+1}. Id: {avalible_tables[i][0]} (Current)")
         else:
             print(f"{i+1}. Id: {avalible_tables[i][0]}")
-        
+
     new_table = input("Please select the new table for the reservation: ")
 
     try:
@@ -153,17 +153,18 @@ def select_new_reservation_table(amount, date, old_table_id):
         table = Table.from_db(database, avalible_tables[new_table])
         date_list = date.split("_")
         if table.occupied[date_list[0]][date_list[1]] == True:
-            print("The selected table is not avalible at the booked time, please select another table.")
+            print(
+                "The selected table is not avalible at the booked time, please select another table.")
             select_new_reservation_table(amount, date, old_table_id)
-        
+
         if new_table < 0 or new_table > len(avalible_tables) - 1:
             print("Please input a valid selection.")
             select_new_reservation_table(amount, date, old_table_id)
-        
+
     except:
         print("Please input a valid number.")
         select_new_reservation_table(amount, date, old_table_id)
-    
+
     return table.id
 
 
@@ -196,7 +197,25 @@ Id: {i[0]}
                             database.update_reservation(
                                 (i[0], new_name, i[2], i[3], i[4]))
                         case "2":
-                            pass
+                            while True:
+                                try:
+                                    new_amount_of_guests = int(input("Enter the new amount of guests:"))
+                                    if new_amount_of_guests > i[2]:
+                                        print("New number of guests cannot exceed current value. Try again.")
+                                        input("Press ENTER to continue.")
+                                        continue
+                                    
+                                    if new_amount_of_guests <= 0:
+                                        print("New number of guests be zero or less than zero. Try again.")
+                                        input("Press ENTER to continue.")
+                                        continue
+                                    break
+                                except KeyboardInterrupt:
+                                    exit()
+                                except:
+                                    print("Invalid input. Try again.")
+                            database.update_reservation(
+                                (i[0], i[1], new_amount_of_guests, i[3], i[4])) 
                         case "3":
                             new_date = select_new_reservation_date(i[2], i[4])
                             database.update_reservation(
@@ -210,8 +229,10 @@ Id: {i[0]}
                             old_reservation.id = i[0]
                             database.set_occupied(old_reservation)
                         case "4":
-                            new_table_nr = select_new_reservation_table(i[2], i[3], i[4])
-                            database.update_reservation((i[0], i[1], i[2], i[3], new_table_nr))
+                            new_table_nr = select_new_reservation_table(
+                                i[2], i[3], i[4])
+                            database.update_reservation(
+                                (i[0], i[1], i[2], i[3], new_table_nr))
                             updated_reservation = Reservation(
                                 db=database, user_amount=i[2], user_name=i[1], user_date=i[3], table_id=new_table_nr)
                             updated_reservation.id = i[0]
@@ -261,6 +282,7 @@ Table number: {i[4]}
         except ValueError:
             print("\nEntered id was of invalid value.")
             input("Press enter to try again.")
+
 
 def menu():
     while True:
