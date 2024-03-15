@@ -17,17 +17,39 @@ class Database:
 
     def __exit__(self, *args):
         self.conn.close()
-
+    
     def next_reservation_id(self):
         """
     Generate the next unique ID for a new reservation based on existing entries in the database.
 
-    This method accesses the 'reservation' table in the database, retrieves all existing reservations,
-    and calculates the next available unique ID. If there are no existing reservations, it starts the
-    IDs from 1. Otherwise, it finds the maximum ID in use and increments it by 1 to ensure uniqueness.
+    This method queries the database to determine the next available reservation ID. It fetches all existing 
+    reservations from the 'reservation' table, calculates the maximum ID, and returns the next available ID 
+    by incrementing the maximum ID by one. If no reservations exist in the database, it returns 1 as the 
+    starting ID.
+
+    Parameters:
+    - self: The instance of the class representing the database connection.
 
     Returns:
-        new_id (int): The next available unique ID for a new reservation.
+    - new_id (int): The next available unique ID for a new reservation.
+
+    Raises:
+    - Any exceptions that may occur during database interaction.
+
+    Description:
+    This method retrieves the next available reservation ID to ensure the uniqueness of reservation IDs 
+    within the database. It is typically used when adding a new reservation to the database to assign a 
+    unique ID to the reservation.
+
+    Example:
+    ```
+    db_connection = YourDatabaseConnection()
+    next_id = db_connection.next_reservation_id()
+    print("Next available reservation ID:", next_id)
+    ```
+
+    Note: This method assumes that reservation IDs are integers and are stored in the first column of the 
+    'reservation' table in the database.
     """
         with self as db:
             cursor = db.cursor()
@@ -47,7 +69,7 @@ class Database:
 
     Parameters:
     - self: The instance of the class representing the database connection.
-    - data (tuple): A tuple containing reservation data in the order (id, name, amt_guests, date, table_nr).
+    - reservation (Reservation): An instance of the Reservation class representing the reservation to be inserted.
 
     Returns:
     - None: Returns None if an exception occurs during the database interaction.
@@ -57,15 +79,16 @@ class Database:
 
     Description:
     This method attempts to insert reservation data into the 'reservation' table of the connected database. The provided
-    data tuple is used to populate the corresponding columns (id, name, amt_guests, date, table_nr). If an exception,
-    specifically sqlite3.ProgrammingError, occurs during the SQL execution, it is caught, printed, and the function
-    returns None. Otherwise, the changes are committed to the database.
+    reservation object is used to populate the corresponding columns (id, name, amt_guests, date, table_nr). If an 
+    exception, specifically sqlite3.ProgrammingError, occurs during the SQL execution, it is caught, printed, and the 
+    function returns None. Otherwise, the changes are committed to the database, and the occupancy status of the 
+    associated table is updated accordingly.
 
     Example:
     ```
     db_connection = YourDatabaseConnection()
-    reservation_data = (1, 'John Doe', 4, '2024-02-02', 3)
-    db_connection.insert_reservation(reservation_data)
+    new_reservation = Reservation(id=1, user_name='John Doe', user_amount=4, user_date='2024-02-02', table_id=3)
+    db_connection.insert_reservation(new_reservation)
     ```
     """
         with self as db:
@@ -237,6 +260,34 @@ class Database:
             return new_id
 
     def update_table(self, table: Table):
+        """
+    Updates table information in the 'tables' table of the connected database based on the provided table object.
+
+    Parameters:
+    - self: The instance of the class representing the database connection.
+    - table (Table): An instance of the Table class representing the table to be updated.
+
+    Returns:
+    - None: Returns None if an exception occurs during the database interaction.
+
+    Raises:
+    - IndexError: Raised if there's an issue with the index while accessing elements in the provided table object.
+    - Any exceptions that may occur during database interaction.
+
+    Description:
+    This method updates table information in the 'tables' table of the connected database. It first checks if the provided
+    table ID exists in the table. If the ID is not found, an error message is printed, and the function returns.
+    Otherwise, the function attempts to update the corresponding columns (capacity, occupied) for the specified table
+    ID. If an exception, specifically IndexError, occurs during the SQL execution, it is caught, printed, and the
+    function returns None. The changes are committed to the database.
+
+    Example:
+    ```
+    db_connection = YourDatabaseConnection()
+    table_to_update = Table(id=1, capacity=6, occupied={})
+    db_connection.update_table(table_to_update)
+    ```
+    """
         with self as db:
             cursor = db.cursor()
             if self.get_tables(table.id) == []:
@@ -256,7 +307,7 @@ class Database:
 
     Parameters:
     - self: The instance of the class representing the database connection.
-    - data (tuple): A tuple containing table information in the order (table_nr, capacity, occupied).
+    - data (Table): An instance of the Table class representing the table to be added.
 
     Returns:
     - None: Returns None if an exception occurs during the database interaction.
@@ -266,17 +317,17 @@ class Database:
     - Any exceptions that may occur during database interaction.
 
     Description:
-    This method adds a new table to the 'tables' table in the connected database. The provided data tuple is used to
-    populate the corresponding columns (table_nr, capacity, occupied). The function checks if the table number and
-    capacity are positive values before attempting to insert the data. If a non-digit value is entered for either the
-    table number or capacity, an error message is printed. If an exception, specifically sqlite3.ProgrammingError,
+    This method adds a new table to the 'tables' table in the connected database. The provided data object represents
+    the table to be added, including attributes such as table number, capacity, and occupancy status. The function
+    checks if the provided capacity is a positive value before attempting to insert the data. If a non-digit value is
+    entered for the capacity, an error message is printed. If an exception, specifically sqlite3.ProgrammingError,
     occurs during the SQL execution, it is caught, printed, and the function returns None. The changes are committed to
     the database.
 
     Example:
     ```
     db_connection = YourDatabaseConnection()
-    new_table_data = (1, 4, False)
+    new_table_data = Table(id=1, capacity=4, occupied=False)
     db_connection.new_table(new_table_data)
     ```
     """
@@ -341,34 +392,29 @@ class Database:
 
     Parameters:
     - self: The instance of the class representing the database connection.
-    - table_nr (int): The table number to identify the record to be updated.
-    - bool (bool or int): The new 'occupied' status to be set for the table.
-      Should be either True/False, or 1/0.
+    - reservation (Reservation): The reservation object containing the information of the reservation.
 
     Returns:
     - None: Returns None if an exception occurs during the database interaction.
 
     Raises:
-    - IndexError: Raised if there's an issue with the index while accessing elements in the 'data' tuple.
     - Any exceptions that may occur during database interaction.
 
     Description:
-    This method updates the 'occupied' status of a table in the 'tables' table of the connected database. It first
-    checks if the provided table number exists in the table. If the table is not found, an error message is printed.
-    If the 'occupied' value provided is not a valid boolean or integer, another error message is printed. Otherwise,
-    the function attempts to update the 'occupied' column for the specified table number. If an exception, specifically
-    IndexError, occurs during the SQL execution, it is caught, printed, and the function returns None. The changes are
-    committed to the database.
+    This method updates the 'occupied' status of a table in the 'tables' table of the connected database based on the
+    provided reservation information. It first checks if the provided table number exists in the table. If the table is
+    not found, an error message is printed. The 'occupied' status of the corresponding table and time slot is toggled
+    between True and False. The function then updates the 'occupied' column for the specified table number in the
+    database. If an exception occurs during the database interaction, it is caught and handled accordingly. The changes
+    are committed to the database.
 
     Example:
     ```
     db_connection = YourDatabaseConnection()
 
-    # Set the 'occupied' status of table number 3 to True
-    db_connection.set_occupied(3, True)
-
-    # Set the 'occupied' status of table number 5 to False
-    db_connection.set_occupied(5, False)
+    # Set the 'occupied' status of a table based on a reservation
+    reservation = YourReservationObject()
+    db_connection.set_occupied(reservation)
     ```
     """
         with self as db:
