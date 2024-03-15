@@ -3,6 +3,7 @@ from database import Database
 from reservations import Reservation
 import datetime
 from json import loads as json_loads
+from table import Table
 
 
 database = Database("./db copy.db")
@@ -126,29 +127,32 @@ def select_new_reservation_date(amount, table_number):
     
     return f"{date}_{time}"
 
-def select_new_reservation_table(amount, date):
+def select_new_reservation_table(amount, date, old_table_id):
     avalible_tables = database.get_tables_by_capacity(amount)
     print(f"Avalible tables with capasity {amount}")
     for i in range(len(avalible_tables)):
-        print(f"{i+1}. Id: {avalible_tables[i][0]}")
+        if avalible_tables[i][0] == old_table_id:
+            print(f"{i+1}. Id: {avalible_tables[i][0]} (Occupied)")
+        else:
+            print(f"{i+1}. Id: {avalible_tables[i][0]}")
         
     new_table = input("Please select the new table for the reservation: ")
     
     try:
         new_table = int(new_table) - 1
+        table = Table.from_db(database, avalible_tables[new_table])
         date_list = date.split("_")
-        if avalible_tables[new_table][3][date_list[0]][date_list[1]] == True:
+        if table.occupied[date_list[0]][date_list[1]] == True:
             print("The selected table is not avalible at the booked time, please select another table.")
-            select_new_reservation_table(amount, date)
+            select_new_reservation_table(amount, date, old_table_id)
         
         if new_table < 0 or new_table > len(avalible_tables) - 1:
             print("Please input a valid selection.")
-            select_new_reservation_table(amount, date)
+            select_new_reservation_table(amount, date, old_table_id)
         
     except:
-        # Hoppar hit av någon anledning
         print("Please input a valid number.")
-        select_new_reservation_table(amount, date)
+        select_new_reservation_table(amount, date, old_table_id)
     
     return new_table
 
@@ -189,7 +193,7 @@ Id: {i[0]}
                             old_reservation.id = i[0]
                             database.set_occupied(old_reservation)
                         case "4":
-                            new_table_nr = select_new_reservation_table(i[2], i[3])
+                            new_table_nr = select_new_reservation_table(i[2], i[3], i[4])
                             database.update_reservation((i[0], i[1], i[2], i[3], new_table_nr))
                             updated_reservation = Reservation(db=database, user_amount=i[2], user_name=i[1], user_date=i[3], table_id=new_table_nr)
                             updated_reservation.id = i[0]
