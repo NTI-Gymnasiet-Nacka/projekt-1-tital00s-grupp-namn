@@ -15,11 +15,12 @@ def clear():
     else:
         system("clear")
 
+
 def remove_reservation():
     clear()
     print("\nRemove reservation\nSelect id\n")
     for i in database.get_reservation():
-            print(f"{i[0]}. {i[1]}")
+        print(f"{i[0]}. {i[1]}")
     choice = input("\n")
     try:
         if choice != "":
@@ -35,18 +36,23 @@ Amount of guessts: {i[2]}
 Date: {i[3]}
 Table number: {i[4]}
                         """)
-                    confirmation = input("Are you sure you want to remove this reservation, y or n?\n")
+                    confirmation = input(
+                        "Are you sure you want to remove this reservation, y or n?\n")
                     if confirmation == "y" or confirmation == "Y":
-                        pass
+                        db_data = database.get_reservation(choice)
+                        reservation = Reservation.from_db(database, db_data)
+                        database.set_occupied(reservation)
+                        database.remove_reservation(choice)
                     elif confirmation == "n" or confirmation == "N":
                         break
                     else:
                         print("Non accepted value entered, interpreted as n.")
                         input()
-                        
+
     except ValueError:
         print("\nEntered id was of invalid value.")
         input("Press enter to try again.")
+
 
 def select_date(weekdays_dict) -> str:
     clear()
@@ -66,6 +72,7 @@ def select_date(weekdays_dict) -> str:
     #     select_date(weekdays_dict)
 
     return date
+
 
 def gen_dates() -> dict:
     now = datetime.datetime.now()
@@ -87,6 +94,7 @@ def gen_dates() -> dict:
             weekdays_dict[date.strftime('%A')] = date.strftime('%A')
 
     return weekdays_dict
+
 
 def select_time(times: dict) -> str:
     for i, time in enumerate(times.keys()):
@@ -115,16 +123,17 @@ def select_time(times: dict) -> str:
 
     return time
 
+
 def select_new_reservation_date(amount, table_number):
     date = select_date(gen_dates())
-    
+
     available_tables = database.get_tables_by_capacity(amount)
     for i in available_tables:
         if i[0] == table_number:
             available_times = json_loads(i[2])[date]
-    
+
     time = select_time(available_times)
-    
+
     return f"{date}_{time}"
 
 def select_new_reservation_table(amount, date, old_table_id):
@@ -137,7 +146,7 @@ def select_new_reservation_table(amount, date, old_table_id):
             print(f"{i+1}. Id: {avalible_tables[i][0]}")
         
     new_table = input("Please select the new table for the reservation: ")
-    
+
     try:
         new_table = int(new_table) - 1
         table = Table.from_db(database, avalible_tables[new_table])
@@ -156,11 +165,12 @@ def select_new_reservation_table(amount, date, old_table_id):
     
     return new_table
 
+
 def update_reservation():
     clear()
     print("\nUpdate reservation\nSelect id\n")
     for i in database.get_reservation():
-            print(f"{i[0]}. {i[1]}")
+        print(f"{i[0]}. {i[1]}")
     choice = input("\n")
     try:
         if choice != "":
@@ -176,20 +186,26 @@ Id: {i[0]}
 3. Date: {f"{i[3].split('_')[0]}, {i[3].split('_')[1]}:00"}
 4. Table number: {i[4]}
                         """)
-                    info_choice = input("Enter the info you wish to update or enter 'all' to update all info.\nId's cannot be updated.\n").lower()
+                    info_choice = input(
+                        "Enter the info you wish to update or enter 'all' to update all info.\nId's cannot be updated.\n").lower()
                     match info_choice:
                         case "1":
-                            new_name = input("Enter the new name: ").capitalize()
-                            database.update_reservation((i[0], new_name, i[2], i[3], i[4]))
+                            new_name = input(
+                                "Enter the new name: ").capitalize()
+                            database.update_reservation(
+                                (i[0], new_name, i[2], i[3], i[4]))
                         case "2":
                             pass
                         case "3":
                             new_date = select_new_reservation_date(i[2], i[4])
-                            database.update_reservation((i[0], i[1], i[2], new_date, i[4]))
-                            updated_reservation = Reservation(db=database, user_amount=i[2], user_name=i[1], user_date=new_date, table_id=i[4])
+                            database.update_reservation(
+                                (i[0], i[1], i[2], new_date, i[4]))
+                            updated_reservation = Reservation(
+                                db=database, user_amount=i[2], user_name=i[1], user_date=new_date, table_id=i[4])
                             updated_reservation.id = i[0]
                             database.set_occupied(updated_reservation)
-                            old_reservation = Reservation(db=database, user_amount=i[2], user_name=i[1], user_date=i[3], table_id=i[4])
+                            old_reservation = Reservation(
+                                db=database, user_amount=i[2], user_name=i[1], user_date=i[3], table_id=i[4])
                             old_reservation.id = i[0]
                             database.set_occupied(old_reservation)
                         case "4":
@@ -198,19 +214,22 @@ Id: {i[0]}
                             updated_reservation = Reservation(db=database, user_amount=i[2], user_name=i[1], user_date=i[3], table_id=new_table_nr)
                             updated_reservation.id = i[0]
                             database.set_occupied(updated_reservation)
-                            old_reservation = Reservation(db=database, user_amount=i[2], user_name=i[1], user_date=i[3], table_id=i[4])
+                            old_reservation = Reservation(
+                                db=database, user_amount=i[2], user_name=i[1], user_date=i[3], table_id=i[4])
                             old_reservation.id = i[0]
                             database.set_occupied(old_reservation)
                         case "all":
                             new_name = input("New name: ")
-                            new_amount_of_guests = input("New amount of guests: ")
+                            new_amount_of_guests = input(
+                                "New amount of guests: ")
                             select_new_reservation_date()
                         case other:
                             pass
-                        
+
     except ValueError:
         print("\nEntered id was of invalid value.")
         input("Press enter to try again.")
+
 
 def display_reservations():
     while True:
@@ -241,11 +260,14 @@ Table number: {i[4]}
             print("\nEntered id was of invalid value.")
             input("Press enter to try again.")
 
+
 def display_avalible_tables():
     pass
 
+
 def edit_table_occupancy():
     pass
+
 
 def menu():
     while True:
@@ -260,7 +282,7 @@ Staff terminal
 5. Edit table occupancy
 6. Exit
             """)
-        match input("Enter your choice: "): 
+        match input("Enter your choice: "):
             case "1": remove_reservation()
             case "2": update_reservation()
             case "3": display_reservations()
@@ -271,6 +293,6 @@ Staff terminal
                 print("\nYou must only select either 1, 2, 3, 4, 5 or 6.")
                 input("Press enter to try again.")
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     menu()
-    
