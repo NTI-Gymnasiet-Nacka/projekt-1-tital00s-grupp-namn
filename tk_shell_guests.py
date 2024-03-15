@@ -3,6 +3,7 @@ import customtkinter as ctk
 import tkinter as tk
 import guest
 from database import Database
+import reservations as res
 
 
 # Sets the appearance mode of the application
@@ -42,8 +43,12 @@ class ToplevelWindow(ctk.CTkToplevel):
                                             list_of_names[3], list_of_names[4], list_of_names[5], list_of_names[6]], command=guest.select_time)
         self.date_input.grid(row=1, column=4, sticky="n")
 
-    def available_times(self):
-        pass
+        self.confirm_button = ctk.CTkButton(self, text="Confirm", command=self.push_to_db)
+        self.confirm_button.grid(row=2, column=2)
+
+    def push_to_db(self):
+        self.reservation = res.Reservation(self.db, self.guest_amount.get(), self.name_input.get(),
+                                       self.date_input.get(), self.table_id)
 
 # Create App class
 
