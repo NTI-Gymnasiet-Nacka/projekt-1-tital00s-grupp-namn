@@ -136,12 +136,13 @@ def select_new_reservation_date(amount, table_number):
 
     return f"{date}_{time}"
 
+
 def select_new_reservation_table(amount, date, old_table_id):
     avalible_tables = database.get_tables_by_capacity(amount)
     print(f"Avalible tables with capasity {amount}")
     for i in range(len(avalible_tables)):
         if avalible_tables[i][0] == old_table_id:
-            print(f"{i+1}. Id: {avalible_tables[i][0]} (Occupied)")
+            print(f"{i+1}. Id: {avalible_tables[i][0]} (Current)")
         else:
             print(f"{i+1}. Id: {avalible_tables[i][0]}")
         
@@ -163,7 +164,7 @@ def select_new_reservation_table(amount, date, old_table_id):
         print("Please input a valid number.")
         select_new_reservation_table(amount, date, old_table_id)
     
-    return new_table
+    return table.id
 
 
 def update_reservation():
@@ -211,7 +212,8 @@ Id: {i[0]}
                         case "4":
                             new_table_nr = select_new_reservation_table(i[2], i[3], i[4])
                             database.update_reservation((i[0], i[1], i[2], i[3], new_table_nr))
-                            updated_reservation = Reservation(db=database, user_amount=i[2], user_name=i[1], user_date=i[3], table_id=new_table_nr)
+                            updated_reservation = Reservation(
+                                db=database, user_amount=i[2], user_name=i[1], user_date=i[3], table_id=new_table_nr)
                             updated_reservation.id = i[0]
                             database.set_occupied(updated_reservation)
                             old_reservation = Reservation(
@@ -260,15 +262,6 @@ Table number: {i[4]}
             print("\nEntered id was of invalid value.")
             input("Press enter to try again.")
 
-
-def display_avalible_tables():
-    pass
-
-
-def edit_table_occupancy():
-    pass
-
-
 def menu():
     while True:
         clear()
@@ -278,19 +271,15 @@ Staff terminal
 1. Remove reservation
 2. Update reservation
 3. Display reservations
-4. Display avalible tables
-5. Edit table occupancy
-6. Exit
+4. Exit
             """)
         match input("Enter your choice: "):
             case "1": remove_reservation()
             case "2": update_reservation()
             case "3": display_reservations()
-            case "4": display_avalible_tables()
-            case "5": edit_table_occupancy()
-            case "6": break
+            case "4": break
             case other:
-                print("\nYou must only select either 1, 2, 3, 4, 5 or 6.")
+                print("\nYou must only select either 1, 2, 3, or 4.")
                 input("Press enter to try again.")
 
 
