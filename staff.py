@@ -17,6 +17,36 @@ def clear():
 
 
 def remove_reservation():
+    """
+    Function to remove a reservation from the database.
+
+    This function displays a list of reservations and prompts the user to select one by entering its ID.
+    After selecting a reservation, it presents the details of the reservation and asks for confirmation
+    to remove it. If confirmed, it removes the reservation from the database.
+
+    Note: This function relies on a global variable `database` which should be an instance of the class
+    representing the database connection.
+
+    Parameters:
+    - None
+
+    Returns:
+    - None
+
+    Raises:
+    - None
+
+    Description:
+    This function displays a list of reservations from the database and prompts the user to select one
+    by entering its ID. It then presents the details of the selected reservation and asks for confirmation
+    to remove it. If confirmed, it removes the reservation from the database using the `remove_reservation`
+    method of the `database` instance.
+
+    Example:
+    ```
+    remove_reservation()
+    ```
+    """
     clear()
     print("\nRemove reservation\nSelect id\n")
     for i in database.get_reservation():
@@ -55,6 +85,32 @@ Table number: {i[4]}
 
 
 def select_date(weekdays_dict) -> str:
+    """
+    Function to select a date for a reservation.
+
+    This function displays a list of weekdays and prompts the user to select one by entering its index.
+    It then returns the selected date as a string.
+
+    Parameters:
+    - weekdays_dict (dict): A dictionary mapping weekday indices to their corresponding dates.
+
+    Returns:
+    - str: The selected date.
+
+    Raises:
+    - None
+
+    Description:
+    This function displays a list of weekdays along with their indices and prompts the user to select one
+    by entering its index. It validates the input and returns the selected date as a string. If the input
+    is invalid, it prompts the user to input a valid selection.
+
+    Example:
+    ```
+    weekdays_dict = {1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday", 5: "Friday", 6: "Saturday", 7: "Sunday"}
+    selected_date = select_date(weekdays_dict)
+    ```
+    """
     clear()
     for i, date in enumerate(weekdays_dict.keys()):
         print(f"{i+1}. {date}")
@@ -75,6 +131,42 @@ def select_date(weekdays_dict) -> str:
 
 
 def gen_dates() -> dict:
+    """
+    Function to generate a dictionary of weekday names and corresponding dates for the next 7 days.
+
+    This function generates a dictionary where the keys are weekday names ("Today", "Tomorrow", and the next 5 weekdays)
+    and the values are the corresponding dates in the format YYYY-MM-DD.
+
+    Parameters:
+    - None
+
+    Returns:
+    - dict: A dictionary mapping weekday names to their corresponding dates.
+
+    Raises:
+    - None
+
+    Description:
+    This function generates a dictionary containing the current weekday followed by the next 6 weekdays along with their
+    corresponding dates. It calculates the dates for each weekday using the current date as a reference and the
+    datetime module. The dictionary is returned with weekday names as keys and dates in the format YYYY-MM-DD as values.
+
+    Example:
+    ```
+    weekdays_dict = gen_dates()
+    print(weekdays_dict)
+    # Output:
+    # {
+    #   'Today': '2024-02-01',
+    #   'Tomorrow': '2024-02-02',
+    #   'Wednesday': '2024-02-02',
+    #   'Thursday': '2024-02-03',
+    #   'Friday': '2024-02-04',
+    #   'Saturday': '2024-02-05',
+    #   'Sunday': '2024-02-06'
+    # }
+    ```
+    """
     now = datetime.datetime.now()
 
     # Create a dictionary to hold the current weekday followed by the next 6 weekdays as keys
@@ -97,6 +189,34 @@ def gen_dates() -> dict:
 
 
 def select_time(times: dict) -> str:
+    """
+    Function to select a time for a reservation.
+
+    This function displays a list of available times for reservation based on the provided dictionary `times`,
+    where keys are time slots and values indicate whether the slot is occupied or not. The user is prompted
+    to select a time by entering its index. If the selected time is occupied or the input is invalid, the
+    user is prompted to input a valid selection.
+
+    Parameters:
+    - times (dict): A dictionary mapping time slots to their occupancy status.
+
+    Returns:
+    - str: The selected time slot.
+
+    Raises:
+    - None
+
+    Description:
+    This function displays a list of available time slots along with their occupancy status and prompts the user
+    to select one by entering its index. It validates the input and returns the selected time slot as a string.
+    If the input is invalid or the selected time slot is occupied, it prompts the user to input a valid selection.
+
+    Example:
+    ```
+    times = {"09:00": False, "10:00": True, "11:00": False}
+    selected_time = select_time(times)
+    ```
+    """
     for i, time in enumerate(times.keys()):
         if times[time] == False:
             print(f"{i+1}. {time}.00")
@@ -125,6 +245,36 @@ def select_time(times: dict) -> str:
 
 
 def select_new_reservation_date(amount, table_number):
+    """
+    Function to select a date and time for a new reservation.
+
+    This function prompts the user to select a date and time for a new reservation based on the given table's
+    available capacities and timeslots. It first prompts the user to select a date using the `select_date` function
+    with available dates generated by `gen_dates`. Then, it retrieves the available timeslots for the given table
+    and date from the database. Finally, it prompts the user to select a time from the available timeslots using
+    the `select_time` function, and returns the concatenated string of the selected date and time.
+
+    Parameters:
+    - amount (int): The capacity required for the reservation.
+    - table_number (int): The number of the table for which the reservation is being made.
+
+    Returns:
+    - str: The concatenated string representing the selected date and time in the format "YYYY-MM-DD_HH:00".
+
+    Raises:
+    - None
+
+    Description:
+    This function guides the user to select a date and time for a new reservation based on the given capacity
+    requirement and table number. It ensures that the selected date and time are valid and available for reservation.
+
+    Example:
+    ```
+    selected_date_time = select_new_reservation_date(4, 1)
+    print(selected_date_time)
+    # Output: "2024-02-05_15:00"
+    ```
+    """
     date = select_date(gen_dates())
 
     available_tables = database.get_tables_by_capacity(amount)
@@ -138,6 +288,38 @@ def select_new_reservation_date(amount, table_number):
 
 
 def select_new_reservation_table(amount, date, old_table_id):
+    """
+    Function to select a new table for a reservation.
+
+    This function prompts the user to select a new table for a reservation, based on the required capacity,
+    the provided date, and the current table ID. It first displays available tables with the required capacity
+    retrieved from the database. The user is prompted to select a new table by entering its index. The function
+    then validates the selection and ensures that the selected table is available at the booked time. If the
+    selection is invalid or the table is not available, the user is prompted to input a valid selection.
+
+    Parameters:
+    - amount (int): The capacity required for the reservation.
+    - date (str): The date and time of the reservation in the format "YYYY-MM-DD_HH:00".
+    - old_table_id (int): The ID of the current table for the reservation.
+
+    Returns:
+    - int: The ID of the selected new table for the reservation.
+
+    Raises:
+    - None
+
+    Description:
+    This function guides the user to select a new table for a reservation based on the provided capacity, date,
+    and the current table ID. It ensures that the selected table is available at the booked time and validates
+    the user input to ensure a valid selection.
+
+    Example:
+    ```
+    new_table_id = select_new_reservation_table(4, "2024-02-05_15:00", 1)
+    print(new_table_id)
+    # Output: 3
+    ```
+    """
     avalible_tables = database.get_tables_by_capacity(amount)
     print(f"Avalible tables with capasity {amount}")
     for i in range(len(avalible_tables)):
@@ -189,7 +371,7 @@ Id: {i[0]}
 4. Table number: {i[4]}
                         """)
                     info_choice = input(
-                        "Enter the info you wish to update or enter 'all' to update all info.\nId's cannot be updated.\n").lower()
+                        "Enter the info you wish to update.\nId's cannot be updated.\n").lower()
                     match info_choice:
                         case "1":
                             new_name = input(
@@ -241,11 +423,6 @@ Id: {i[0]}
                                 db=database, user_amount=i[2], user_name=i[1], user_date=i[3], table_id=i[4])
                             old_reservation.id = i[0]
                             database.set_occupied(old_reservation)
-                        case "all":
-                            new_name = input("New name: ")
-                            new_amount_of_guests = input(
-                                "New amount of guests: ")
-                            select_new_reservation_date()
                         case other:
                             pass
 
@@ -255,6 +432,33 @@ Id: {i[0]}
 
 
 def display_reservations():
+    """
+    Function to display reservations and their details.
+
+    This function continuously displays a list of reservations along with their details, such as ID, name, 
+    number of guests, date, and table number. The user is prompted to select a reservation by entering its ID.
+    Upon selection, the details of the chosen reservation are displayed. The loop continues until the user 
+    chooses to exit by entering an empty input.
+
+    Parameters:
+    - None
+
+    Returns:
+    - None
+
+    Raises:
+    - None
+
+    Description:
+    This function continuously displays reservation information and handles user input to view details 
+    of specific reservations. It ensures that the entered reservation ID is valid and handles any 
+    invalid input gracefully.
+
+    Example:
+    ```
+    display_reservations()
+    ```
+    """
     while True:
         clear()
         print("\nReservations\nSelect id\n")
@@ -285,6 +489,33 @@ Table number: {i[4]}
 
 
 def menu():
+    """
+    Function to display and navigate the staff terminal menu.
+
+    This function continuously displays a menu for staff terminal options and prompts the user to select 
+    an action by entering a corresponding number. The user can choose to remove a reservation, update a 
+    reservation, display reservations, or exit the terminal. The function then directs the user to the 
+    respective action based on their input.
+
+    Parameters:
+    - None
+
+    Returns:
+    - None
+
+    Raises:
+    - None
+
+    Description:
+    This function serves as the main menu for the staff terminal, allowing staff members to perform various 
+    actions related to reservations. It ensures that the user input is valid and handles any invalid choices 
+    gracefully.
+
+    Example:
+    ```
+    menu()
+    ```
+    """
     while True:
         clear()
         print("""
