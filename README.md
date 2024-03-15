@@ -7,4 +7,4 @@
 - [Github](https://github.com/NTI-Gymnasiet-Nacka/projekt-1-tital00s-grupp-namn)
 
 ## The duality of man
-![Duality of maaaaan](https://imgur.com/a/IYPdvzM)
+![Duality of maaaaan](image.png)
